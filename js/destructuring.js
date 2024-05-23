@@ -108,3 +108,20 @@ function fn({ a, b }) {
   console.log(a, b);
 }
 fn({ a: 1, b: 2 }); // 1 2
+
+function fn2(...args) {
+  console.log('arguments =', arguments);
+}
+fn2(1, 2, 3); // arguments = [Arguments] { '0': 1, '1': 2, '2': 3 }
+
+const { name: n, age = 30 } = { name: 'Lee' }; // n = 30, age = Lee
+const { age2 = 30 } = { name: 'Park', age2: 20 }; // age2 = 20
+
+const fn3 = ({ age }) => age;
+const { age2: age3 = fn3(user2) } = { age22: 40 };
+const { age2: newage } = { age2: 40 };
+console.log(age2); // age2는 위에 선언된거 가져옴
+console.log(fn3(user2)); // user2.age
+console.log(age3); // {age22 = 40}에 age2가 없어서 fn3(user2)의 결과값인 30이 들어감
+console.log(newage); // {age2 = 40}에 age2가 있어서 40이 들어감
+// console.log(age22);  // ReferenceError: age22 is not defined
