@@ -19,7 +19,11 @@ console.log('출력', Object.entries(obj));
 console.log('----HW-object3------');
 function makeObjectFromArray(object1) {
   // 구현
-  const [k, ...v] = object1;
+  const obj = {};
+  for (const [k, ...v] of object1) {
+    obj[k] = v;
+  }
+  return obj;
 }
 
 const obj1 = makeObjectFromArray([
@@ -28,3 +32,33 @@ const obj1 = makeObjectFromArray([
   ['C', 50, 60, 70],
 ]);
 console.log(obj1); // { A: [10, 20], B: [30, 40], C: [50, 60, 70] }
+
+console.log('----HW-object4------');
+function makeArrayFromObject(object2) {
+  // 구현
+  const arr = [];
+  for (const [k, v] of Object.entries(object2)) {
+    arr.push([k, ...v]);
+  }
+  return arr;
+}
+
+const obj2 = makeArrayFromObject({ A: [10, 20], B: [30, 40], C: [50, 60, 70] });
+console.log(obj2); // [ [ 'A', 10, 20 ], [ 'B', 30, 40 ], [ 'C', 50, 60, 70 ] ]
+
+console.log('----HW-object5------');
+function copyObject(object3) {
+  // 구현
+  // return { ...object3 };
+
+  // spread(...) 사용 안하고 구현
+  const ret = {};
+  for (const k in object3) {
+    ret[k] = object3[k];
+  }
+  return ret;
+}
+const kim = { nid: 3, nm: 'Hong', addr: 'Pusan' };
+const newKim = copyObject(kim); // shallow copy
+newKim.addr = 'Daegu';
+console.log(kim.addr !== newKim.addr); // true면 통과!
