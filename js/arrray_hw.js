@@ -2,7 +2,7 @@
 const assert = require('assert');
 
 function push(arr, ...args) {
-  return arr.concat(args);
+  return arr.concat([...args]);
 }
 
 function pop(arr, i) {
@@ -18,6 +18,7 @@ function unshift(arr, ...args) {
 }
 
 const arr = [1, 2, 3, 4];
+console.log(push(arr, 5, 6)); // [1, 2, 3, 4, 5, 6]
 console.log(assert.deepStrictEqual(push(arr, 5, 6), [1, 2, 3, 4, 5, 6]));
 // console.log(assert.deepStrictEqual(pop(arr), 4));
 // assert.deepStrictEqual(pop(arr, 2), [3, 4]); // 2개 팝!
