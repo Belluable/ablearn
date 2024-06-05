@@ -1,6 +1,6 @@
 {
-  "name": "js",
-  "version": "0.1.0",
+  "name": "ableanbell",
+  "version": "0.1.0-beta.4",
   "description": "js study",
   "main": "index.js",
   "scripts": {
@@ -13,6 +13,7 @@
   "author": "Bell",
   "license": "ISC",
   "dependencies": {
+    "ableanbell": "^0.1.0-beta.3",
     "moment": "^2.30.1"
   }
 }
