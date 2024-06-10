@@ -1,0 +1,26 @@
+.highlight {
+  background-color: yellow;
+}
+
+#header {
+  font-size: 24px;
+}
+
+nav ul {
+  list-style: none;
+}
+
+.red {
+  color: red;
+}
+
+.white {
+  color: white;
+}
+.bg-red {
+  background-color: red;
+}
+
+.fav-color {
+  color: blue;
+}
