@@ -319,10 +319,11 @@ interface Dept {
 interface Ud2 {
   // <이 부분을 작성하시오>
   // type Ud2 = (TUser | TDept) & {addr: string}; 변경
+  [k: string]: string | number;
   id: number;
-  name?: string;
-  dname?: string;
-  captain?: string;
+  // name?: string;
+  // dname?: string;
+  // captain?: string;
   addr: string;
 }
 
