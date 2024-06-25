@@ -1,74 +1,31 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
-import {
-  FaCartPlus,
-  FaUndoAlt,
-  FaTrashAlt,
-  FaEdit,
-  FaSave,
-} from 'react-icons/fa';
+import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import { FaTrashAlt, FaEdit } from 'react-icons/fa';
 import Login from './Login';
 import Profile from './Profile';
 import Button from './atoms/Button';
 import SampleAtoms from './atoms/SampleAtoms';
-import Input from './atoms/Input';
+import ItemEdit from './ItemEdit';
 
 export default function My({
   session: { loginUser, cart },
   signOut,
   signIn,
   removeItem,
-  addItem: addCartItem,
-  saveItem: saveCartItem,
+  addItem,
+  saveItem,
 }) {
   const [isAdding, setIsAdding] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
-  const itemNameRef = useRef();
-  const itemPriceRef = useRef();
 
-  const cancelAdding = (evt) => {
-    evt.preventDefault();
-    setIsAdding(false);
-  };
-
-  const addItem = (evt) => {
-    evt.preventDefault();
-    const itemName = itemNameRef.current.value;
-    const itemPrice = itemPriceRef.current.value;
-    console.log('🚀  itemName, itemPrice:', itemName, itemPrice);
-    if (!itemName || !itemPrice) {
-      alert('상품명과 금액을 정확히 입력하세요!');
-      itemNameRef.current.focus();
-      return;
-    }
-    addCartItem(itemName, +itemPrice);
+  const cancelAdding = () => {
     setIsAdding(false);
   };
 
   const editing = (itemId) => {
     setEditingItem(cart.find((item) => item.id === itemId));
   };
-  useEffect(() => {
-    if (editingItem) {
-      itemNameRef.current.value = editingItem.name;
-      itemPriceRef.current.value = editingItem.price;
-      itemNameRef.current.select();
-    }
-  }, [editingItem]);
 
   const cancelEditing = () => {
-    setEditingItem(null);
-  };
-  const saveItem = (evt) => {
-    evt.preventDefault();
-    const itemName = itemNameRef.current.value;
-    const itemPrice = itemPriceRef.current.value;
-    console.log('🚀 ~ itemName, itemPrice:', itemName, itemPrice);
-    if (!itemName || !itemPrice) {
-      alert('상품명과 금액을 정확히 입력하세요!');
-      itemNameRef.current.focus();
-      return;
-    }
-    saveCartItem(editingItem.id, itemName, +itemPrice);
     setEditingItem(null);
   };
 
@@ -76,36 +33,44 @@ export default function My({
   const [time, setTime] = useState(
     Math.round(new Date().getTime() / 1000) % 1000
   );
+
   useEffect(() => {
     const intl = setInterval(() => {
       setTime((time) => time + 1);
     }, 1000);
 
     return () => {
-      console.log('intl clear!');
+      // console.log('intl clear!');
       clearInterval(intl);
     };
   }, []);
 
-  const [posts, setPosts] = useState([]);
-  useEffect(() => {
-    const controller = new AbortController();
-    const { signal } = controller;
-    console.log('fetch!');
-    fetch('https://jsonplaceholder.typicode.com/posts', { signal })
-      .then((res) => res.json())
-      .then((data) => setPosts(data))
-      .catch((err) => console.error(err));
+  // const [posts, setPosts] = useState([]);
+  // useEffect(() => {
+  //   const controller = new AbortController();
+  //   const { signal } = controller;
+  //   console.log('fetch!');
+  //   fetch('https://jsonplaceholder.typicode.com/posts', { signal })
+  //     .then((res) => res.json())
+  //     .then((data) => setPosts(data))
+  //     .catch((err) => console.error(err));
 
-    return () => {
-      console.log('abort!');
-      controller.abort();
-    };
-  }, []);
+  //   return () => {
+  //     console.log('abort!');
+  //     controller.abort();
+  //   };
+  // }, []);
 
   useLayoutEffect(() => {
-    console.log('useLayoutEffect');
+    // console.log('useLayoutEffect');
   }, []);
+
+  const addingItem = useMemo(() => ({ name: '', price: 1000 }), []);
+
+  const totalPirce = useMemo(
+    () => cart?.reduce((acc, item) => acc + item.price, 0),
+    [cart]
+  );
 
   return (
     <>
@@ -114,9 +79,8 @@ export default function My({
       ) : (
         <Login singIn={signIn} />
       )}
-      <h1>
-        Second: {time} - posts: {posts.length}
-      </h1>
+
+      <h1>Second: {time}</h1>
 
       <div className="my-5 border text-center">
         <ul>
@@ -124,25 +88,11 @@ export default function My({
             ? cart.map((item) => (
                 <li key={item.id} className="flex justify-between border-b">
                   {editingItem?.id === item.id ? (
-                    <form className="m-2 flex gap-3 border border-green-300 p-3">
-                      <Input ref={itemNameRef} placeholder="상품명" />
-                      <Input
-                        ref={itemPriceRef}
-                        type="number"
-                        placeholder="금액"
-                      />
-                      <Button
-                        text={<FaUndoAlt />}
-                        onClick={cancelEditing}
-                        size="sm"
-                      />
-                      <Button
-                        text={<FaSave />}
-                        onClick={saveItem}
-                        type="primary"
-                        size="sm"
-                      />
-                    </form>
+                    <ItemEdit
+                      item={editingItem}
+                      cancel={cancelEditing}
+                      save={saveItem}
+                    />
                   ) : (
                     <>
                       <span className="text-xs text-gray-300">{item.id}</span>
@@ -161,7 +111,10 @@ export default function My({
                           className="py-1"
                         />
                         <Button
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => {
+                            if (confirm('삭제하시겠습니까?'))
+                              removeItem(item.id);
+                          }}
                           type="danger"
                           text={<FaTrashAlt />}
                           size="xs"
@@ -174,18 +127,11 @@ export default function My({
               ))
             : '장바구니가 비었습니다.'}
         </ul>
+        <h3 className="text-left text-green-500 pl-3">
+          total: {totalPirce.toLocaleString()}
+        </h3>
         {isAdding ? (
-          <form className="m-2 flex gap-3 border border-green-300 p-3">
-            <Input ref={itemNameRef} placeholder="상품명" />
-            <Input ref={itemPriceRef} type="number" placeholder="금액" />
-            <Button text={<FaUndoAlt />} onClick={cancelAdding} size="sm" />
-            <Button
-              text={<FaCartPlus />}
-              onClick={addItem}
-              type="primary"
-              size="sm"
-            />
-          </form>
+          <ItemEdit cancel={cancelAdding} save={addItem} item={addingItem} />
         ) : (
           <Button
             onClick={() => setIsAdding(true)}
