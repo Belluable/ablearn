@@ -5,6 +5,7 @@ import Profile from './Profile';
 import Button from './atoms/Button';
 import SampleAtoms from './atoms/SampleAtoms';
 import ItemEdit from './ItemEdit';
+import { useCount } from '../hooks/counter-context';
 
 export default function My({
   session: { loginUser, cart },
@@ -17,16 +18,10 @@ export default function My({
   const [isAdding, setIsAdding] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
+  const { count } = useCount();
+
   const cancelAdding = () => {
     setIsAdding(false);
-  };
-
-  const editing = (itemId) => {
-    setEditingItem(cart.find((item) => item.id === itemId));
-  };
-
-  const cancelEditing = () => {
-    setEditingItem(null);
   };
 
   //test useEffect
@@ -67,10 +62,29 @@ export default function My({
 
   const addingItem = useMemo(() => ({ name: '', price: 1000 }), []);
 
-  const totalPirce = useMemo(
-    () => cart?.reduce((acc, item) => acc + item.price, 0),
-    [cart]
-  );
+  const editing = (itemId) => {
+    const item = cart.find((item) => item.id === itemId);
+    setEditingItem(item);
+    setPrePrice(item.price);
+  };
+
+  const cancelEditing = () => {
+    setEditingItem(null);
+    setPrePrice(0);
+  };
+
+  const editItem = (item) => {
+    saveItem(item);
+    if (prePrice !== item.price) setTotalPriceToggleFlag(!totalPriceToggleFlag);
+  };
+
+  const [totalPriceToggleFlag, setTotalPriceToggleFlag] = useState(false);
+  const [prePrice, setPrePrice] = useState(0);
+
+  const totalPirce = useMemo(() => {
+    console.log('totalPirce>>', totalPriceToggleFlag);
+    return cart?.reduce((acc, item) => acc + item.price, 0);
+  }, [cart, totalPriceToggleFlag]);
 
   return (
     <>
@@ -80,8 +94,13 @@ export default function My({
         <Login singIn={signIn} />
       )}
 
-      <h1>Second: {time}</h1>
-
+      <h1>
+        Second: {time} - {count}
+      </h1>
+      <Button
+        text="TotalPrice"
+        onClick={() => setTotalPriceToggleFlag(!totalPriceToggleFlag)}
+      />
       <div className="my-5 border text-center">
         <ul>
           {cart?.length
@@ -91,7 +110,7 @@ export default function My({
                     <ItemEdit
                       item={editingItem}
                       cancel={cancelEditing}
-                      save={saveItem}
+                      save={editItem}
                     />
                   ) : (
                     <>
@@ -131,7 +150,7 @@ export default function My({
           total: {totalPirce.toLocaleString()}
         </h3>
         {isAdding ? (
-          <ItemEdit cancel={cancelAdding} save={addItem} item={addingItem} />
+          <ItemEdit item={addingItem} cancel={cancelAdding} save={addItem} />
         ) : (
           <Button
             onClick={() => setIsAdding(true)}

@@ -1,13 +1,13 @@
+import { memo, useEffect, useRef } from 'react';
 import { FaCartPlus, FaSave, FaUndoAlt } from 'react-icons/fa';
 import Button from './atoms/Button';
 import Input from './atoms/Input';
-import { useEffect, useRef } from 'react';
 
-export default function ItemEdit(
+export default function ItemEdit({
   item,
   cancel, // cancelEditing | cancelAdding
-  save // saveItem | addItem
-) {
+  save, // saveItem | addItem
+}) {
   const nameRef = useRef();
   const priceRef = useRef();
 
@@ -51,3 +51,9 @@ export default function ItemEdit(
     </>
   );
 }
+
+// 두 번째 인자(비교함수)가 true를 return 하면 ItemEdit 컴포넌트를 다시 생성하지 않는다.
+// 다만 비교함수는 매번 렌더링마다 호출된다!
+export const MemoedItemEdit = memo(ItemEdit, ({ item: a }, { item: b }) => {
+  return a === b;
+});

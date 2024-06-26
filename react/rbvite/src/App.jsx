@@ -2,6 +2,7 @@ import { useState } from 'react';
 import './App.css';
 import Hello from './components/Hello';
 import My from './components/My';
+import { useCount } from './hooks/counter-context';
 
 // mock
 const SampleSession = {
@@ -15,9 +16,9 @@ const SampleSession = {
 
 function App() {
   const [session, setSession] = useState(SampleSession);
-  const [count, setCount] = useState(0);
-  const plusCount = () => setCount((count) => count + 1);
-
+  // const [count, setCount] = useState(0);
+  // const plusCount = () => setCount((count) => count + 1);
+  const { count, plusCount } = useCount();
   const logout = () => setSession({ ...session, loginUser: null });
 
   const login = (name) => {
@@ -46,23 +47,23 @@ function App() {
   };
 
   const saveItem = (editingItem) => {
-    const { id } = editingItem;
-    setSession({
-      ...session,
-      cart: [
-        ...session.cart.map((item) => (item.id === id ? editingItem : item)),
-      ],
-    });
+    const { id, name, price } = editingItem;
+    const foundItem = session.cart.find((item) => item.id === id);
+    foundItem.name = name;
+    foundItem.price = price;
+    setSession({ ...session }); // session은 바껴도 cart는 바뀌지 않는다.
+    // setSession({
+    //   ...session,
+    //   cart: [
+    //     ...session.cart.map((item) => (item.id === id ? editingItem : item)),
+    //   ],
+    // });
   };
   return (
     <>
       <div>
         {session.loginUser && (
-          <Hello
-            name={session.loginUser.name}
-            age={session.loginUser.age}
-            plusCount={plusCount}
-          />
+          <Hello name={session.loginUser.name} age={session.loginUser.age} />
         )}
       </div>
 
@@ -75,9 +76,7 @@ function App() {
         saveItem={saveItem}
       />
       <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
+        <button onClick={plusCount}>count is {count}</button>
       </div>
     </>
   );
