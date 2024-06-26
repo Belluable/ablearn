@@ -1,20 +1,28 @@
-import { useEffect, useLayoutEffect, useMemo, useState } from 'react';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useState,
+} from 'react';
 import { FaTrashAlt, FaEdit } from 'react-icons/fa';
 import Login from './Login';
 import Profile from './Profile';
 import Button from './atoms/Button';
 import SampleAtoms from './atoms/SampleAtoms';
-import ItemEdit from './ItemEdit';
+import { MemoedItemEdit } from './ItemEdit';
 import { useCount } from '../hooks/counter-context';
+import { useSession } from '../hooks/session-context';
+import Hello from './Hello';
 
-export default function My({
-  session: { loginUser, cart },
-  signOut,
-  signIn,
-  removeItem,
-  addItem,
-  saveItem,
-}) {
+export default function My() {
+  const {
+    session: { loginUser, cart },
+    addItem,
+    saveItem,
+    removeItem,
+  } = useSession();
+
   const [isAdding, setIsAdding] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
 
@@ -62,52 +70,61 @@ export default function My({
 
   const addingItem = useMemo(() => ({ name: '', price: 1000 }), []);
 
-  const editing = (itemId) => {
-    const item = cart.find((item) => item.id === itemId);
-    setEditingItem(item);
-    setPrePrice(item.price);
-  };
-
-  const cancelEditing = () => {
-    setEditingItem(null);
-    setPrePrice(0);
-  };
-
-  const editItem = (item) => {
-    saveItem(item);
-    if (prePrice !== item.price) setTotalPriceToggleFlag(!totalPriceToggleFlag);
-  };
+  const editing = useCallback(
+    (itemId) => {
+      console.log('🚀 ~ My ~ itemId:', itemId);
+      const item = cart.find((item) => item.id === itemId);
+      setEditingItem(item);
+      setPrePrice(item.price);
+    },
+    [cart]
+  );
 
   const [totalPriceToggleFlag, setTotalPriceToggleFlag] = useState(false);
   const [prePrice, setPrePrice] = useState(0);
 
   const totalPirce = useMemo(() => {
-    console.log('totalPirce>>', totalPriceToggleFlag);
+    console.warn('totalPirce>>', totalPriceToggleFlag);
     return cart?.reduce((acc, item) => acc + item.price, 0);
   }, [cart, totalPriceToggleFlag]);
 
+  const cancelEditing = useCallback(() => {
+    setEditingItem(null);
+    setPrePrice(0);
+  }, []);
+
+  const editItem = useCallback(
+    (item) => {
+      saveItem(item);
+      if (prePrice !== item.price)
+        setTotalPriceToggleFlag(!totalPriceToggleFlag);
+
+      // setTotalPriceToggleFlag(prePrice !== item.price);
+    },
+    [saveItem, prePrice, totalPriceToggleFlag]
+  );
+
   return (
     <>
-      {loginUser ? (
-        <Profile name={loginUser?.name} signOut={signOut} />
-      ) : (
-        <Login singIn={signIn} />
+      {loginUser && (
+        <div>
+          <Hello name={loginUser.name} age={loginUser.age} />
+        </div>
       )}
+
+      {loginUser ? <Profile /> : <Login />}
 
       <h1>
         Second: {time} - {count}
       </h1>
-      <Button
-        text="TotalPrice"
-        onClick={() => setTotalPriceToggleFlag(!totalPriceToggleFlag)}
-      />
+
       <div className="my-5 border text-center">
         <ul>
           {cart?.length
             ? cart.map((item) => (
                 <li key={item.id} className="flex justify-between border-b">
                   {editingItem?.id === item.id ? (
-                    <ItemEdit
+                    <MemoedItemEdit
                       item={editingItem}
                       cancel={cancelEditing}
                       save={editItem}
@@ -150,7 +167,11 @@ export default function My({
           total: {totalPirce.toLocaleString()}
         </h3>
         {isAdding ? (
-          <ItemEdit item={addingItem} cancel={cancelAdding} save={addItem} />
+          <MemoedItemEdit
+            item={addingItem}
+            cancel={cancelAdding}
+            save={addItem}
+          />
         ) : (
           <Button
             onClick={() => setIsAdding(true)}

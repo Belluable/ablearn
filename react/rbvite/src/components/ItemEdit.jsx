@@ -23,7 +23,7 @@ export default function ItemEdit({
       nameRef.current.focus();
       return;
     }
-    save({ id: item.id, name, price: +price });
+    save({ id: item?.id, name, price: +price });
     cancel();
   };
 
@@ -42,7 +42,7 @@ export default function ItemEdit({
         <Input ref={priceRef} type="number" placeholder="금액" />
         <Button text={<FaUndoAlt />} onClick={cancel} size="sm" />
         <Button
-          text={item.id ? <FaSave /> : <FaCartPlus />}
+          text={item?.id ? <FaSave /> : <FaCartPlus />}
           onClick={saveItem}
           type="primary"
           size="sm"
