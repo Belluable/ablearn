@@ -20,6 +20,10 @@ export default function CSR() {
     })();
   }, []);
 
+  function searchName(event: MouseEvent<HTMLInputElement>) {
+    event.preventDefault;
+  }
+
   return (
     <>
       <h1>This is About Page!! {dtStr}</h1>
